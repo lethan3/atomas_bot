@@ -31,8 +31,21 @@ class Bot:
             evals.sort(reverse = True)
             print(evals)
             if (evals[0][0] == -1):
-                # 
-                return random.randint(0, len(field.atoms) - 1)
+                pluses = []
+                for i in range(len(field.atoms)):
+                    if (field.atoms[i] == -1):
+                        pluses.append(i)
+                max_gap, ind = 0, 0
+                for i in range(len(pluses)):
+                    if (i != len(pluses) - 1):
+                        if (pluses[i + 1] - pluses[i] > max_gap):
+                            max_gap = pluses[i + 1] - pluses[i]
+                            ind = (pluses[i + 1] + pluses[i]) // 2
+                    else:
+                        if (pluses[0] + len(field.atoms) - pluses[-1] > max_gap):
+                            max_gap = pluses[0] + len(field.atoms) - pluses[-1]
+                            ind = ((pluses[-1] + pluses[0] + len(field.atoms)) // 2) % len(field.atoms)
+                return ind
             return evals[0][1]
         
         if (last_atom == -2):
