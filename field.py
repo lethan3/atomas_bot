@@ -10,7 +10,8 @@ class Field:
     # -3 -> dark plus
     # -4 -> neutrino
 
-    def __init__(self, display, init_atoms = []):
+    def __init__(self, display, init_atoms=None):
+        if (init_atoms is None): init_atoms = []
         self.display = display
         self.atoms = init_atoms
 
@@ -48,11 +49,13 @@ class Field:
         if len(self.atoms): self.atoms.pop(ind % len(self.atoms))
         else: raise Exception('Atom removed in empty field')
 
+    def check_for_reaction(self, ind):
+        return (self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3 and max(self.get_atom(ind - 1), self.get_atom(ind + 1)) >= 1)
+
     def reaction(self, ind):
         while len(self.atoms) > 2:
-
-            if ((self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1))
-                 or (self.get_atom(ind) == -3 and max(self.get_atom(ind - 1), self.get_atom(ind + 1)) >= 1)):
+            if (self.check_for_reaction(ind)):
+                ind -= 1
                 new_atom = max(self.get_atom(ind) + 1, self.get_atom(ind + 1) + 2)
                 
                 if (self.get_atom(ind) == -3):
@@ -83,12 +86,8 @@ class Field:
             if len(self.atoms) <= 2: return
             self.print_state()
             for i in range(len(self.atoms)):
-                if ((self.get_atom(i) >= 1 
-                     and self.get_atom(i) == self.get_atom(i + 2) 
-                     and self.get_atom(i + 1) == -1) 
-                     or self.get_atom(i + 1) == -3):
-                    
-                    self.reaction(i + 1)
+                if (self.check_for_reaction(i)): 
+                    self.reaction(i)
                     break
             else:
                 break

@@ -1,15 +1,26 @@
 import random
 
-# TODO: Handle empty list case
-
 from field import Field, special
 
-class Bot:
-    def __init__():
-        pass
 
-    def move(field, spawned_atoms, last_atom, op):
+
+class Bot:
+    def __init__(self):
+        self.fout = open('decisions.txt', 'w+')
+
+    def move(self, field, spawned_atoms, last_atom, op):
+        decision = self.decide(field, spawned_atoms, last_atom, op)
+        self.fout.write(str(len(field)) + ' ' + ' '.join(field) + ',\n')
+        self.fout.write(str(len(spawned_atoms)) + ' ' + ' '.join(spawned_atoms) + ',\n')
+        self.fout.write(str(last_atom) + '\n')
+        self.fout.write(str(op) + '\n')
+        self.fout.write(str(decision) + '\n\n')
+        self.fout.flush()
+        return decision
+
+    def decide(self, field, spawned_atoms, last_atom, op):
         if op: return 1
+        if len(field.atoms) == 0: return 0
         
         if (last_atom > 0):
             evals = []
@@ -29,7 +40,6 @@ class Bot:
                 test_field.reduce()
                 evals.append([len(field.atoms) - len(test_field.atoms), i])
             evals.sort(reverse = True)
-            print(evals)
             if (evals[0][0] == -1):
                 pluses = []
                 for i in range(len(field.atoms)):

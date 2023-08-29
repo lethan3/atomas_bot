@@ -4,13 +4,13 @@ from field import Field, special
 from bot import Bot
 
 class Game:
-    def __init__(self, display, manual):
+    def __init__(self, display, bot = None):
         self.field = Field(display)
         for i in range(6):
             self.field.place_atom(i, random.randint(1, 3))
         self.spawned_atoms = []
         self.display = display
-        self.manual = manual
+        self.bot = bot
         
     def dprint(self, *arg):
         if (self.display): print(arg)
@@ -42,6 +42,8 @@ class Game:
         return spawned_atom
                            
     def turn(self):
+        if (len(self.spawned_atoms) % 20 == 0):
+            print(end='.',flush=True)
         self.dprint("new turn")
         spawned_atom = self.spawn_atom()
         self.process_spawn(spawned_atom, False)
@@ -67,8 +69,8 @@ class Game:
             self.field.reduce()
                            
     def get_input(self, spawned_atom, op):
-        if self.manual: return int(input())
-        else: return Bot.move(self.field, self.spawned_atoms, spawned_atom, op)
+        if self.bot is None: return int(input())
+        else: return self.bot.move(self.field, self.spawned_atoms, spawned_atom, op)
                            
     def play(self):
         self.field.print_state()

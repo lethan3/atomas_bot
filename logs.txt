@@ -1,0 +1,17 @@
+8/25/23-8/26/23 (Version 1): 
+
+* Implemented game. Still need to work out some edge cases, mostly with combining pluses with dark pluses, etc.
+* Atom spawning mechanism isn't completely known; online research is vague/conflicts with actual gameplay. Will have to explore how to most accurately match mechanism
+* Implemented hard-coded decision-based bot. 
+    * Decides to place elements based on a brute-force search, first seeing if it can reduce with any pluses/other elements on the board, then checking if it can increase the number/length of available chain reactions.
+    * Decides to place pluses based on maximum size reduction of field. If no reduction is present, initially always chose 0 or a random index. This led to "pooling" of pluses on the board, so now an index is chosen which maximizes distance from other pluses.
+    * For minuses, always turns highest element into a plus.
+    * Other particles (dark plus, neutrino) always return 0. Due to their rarity this should not affect the game much.
+* Bot was tested for 100 trials: number of turns before game end has mean of about 1000 turns, stddev of about 400. Highest noted turn count was 1954.
+* Pooling of pluses still seems to be an issue; this can cause an early end to the game
+
+8/27/23-8/28/23:
+
+* Attempted to implement screen-reading mechanism to get game state from display.
+* First approach: use known hex codes of colors to determine the atom, choosing the closest choice based on Euclidean distance. This did not work at all until I realized that the screen was altering the colors shown on the display. Gathering a few data points and doing linear regressions on each of the RGB channels improved the accuracy immensely, but the program still could not differentiate between similarly-colored atoms (pluses and Manganese) as well as atoms of the same type that were close together.
+* Second approach: use tesseract OCR to read the element symbols. Even after image preprocessing, tesseract could not read the 'H' symbols on the hydrogen atoms.
