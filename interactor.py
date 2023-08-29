@@ -3,65 +3,123 @@ import pyautogui
 import keyboard
 import time
 import math
-import cv2
+import cv, cv2
+import numpy as np
+import datetime
+from PIL import Image
+
+from field import Field
+from bot import Bot
 
 class Interactor:
     def __init__(self):
         pass
 
-    def dist(self, a, b):
-        r = 0
-        for i in range(len(a)):
-            r += (a[i] - b[i]) ** 2
-        return r
+    def read_center(self):
+        img = np.array(pyautogui.screenshot())
+        # img = np.array(Image.open('ss.png'))
+        img = img[617:693,922:998]
+        cv2.imwrite('ss.png', cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+        for i in range(-4, 41):
+            if (i == 0): continue
+            atom = cv2.imread('img/' + str(i) + '.png')
+            atom = atom[16:60,16:60]
+            
+            img_cv = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            match_scores = []
+            for channel in range(3):  # Assuming a 3-channel color space like HSV or BGR
+                result = cv2.matchTemplate(img_cv[:, :, channel], atom[:, :, channel], cv2.TM_SQDIFF_NORMED)
+                match_scores.append(result)
+            res = np.max(match_scores, axis=0)
+            mask = res < 0.025
+            coordinates = np.transpose(np.where(mask))
+            for c in coordinates:
+                return i
+        return None
     
-    def match_atom(self, rgb):
-        rgb = list(rgb)
-        for j in range(3):
-            rgb[j] = rgb[j] * rgb_adjust_a[j] + rgb_adjust_b[j]
+    def stream_center(self):
+        from pynput.keyboard import Key, Listener
+        space_pressed = False
 
-        match, best_dist = 0, 1e9
-        for j in range(len(atom_colors)):
-                if self.dist(atom_colors[j], rgb) < best_dist:
-                    best_dist = self.dist(atom_colors[j], rgb)
-                    match = j
+        fout = open('spawned_atoms.txt', 'w+')
+        last = -5
+        ignore = False
+        while not (keyboard.is_pressed('q') and keyboard.is_pressed('p')):
+            if (keyboard.is_pressed('space')):
+                print('Ignoring next')
+                ignore = True
+            atom = self.read_center()
+            if atom is None:
+                last = -5
+            elif atom != last:
+                if (last == -5 and ignore):
+                    last = atom
+                    ignore = False
+                    continue
+                print(str(atom) + ' ')
+                fout.write(str(atom) + ' ')
+                fout.flush()
+                last = atom
+                if (atom == -2):
+                    print('(Ignoring next)')
+                    ignore = True
 
-        return match - 4
-    
-    def get_center(self):
-        rgba = pyautogui.pixel(field_x, field_y - 20)
-        time.sleep(0.1)
-        rgbb = pyautogui.pixel(field_x, field_y - 20)
-        if (rgba != rgbb): return -1
+    def read_field(self):
+        img = np.array(pyautogui.screenshot())
+        # img = np.array(Image.open('ss.png'))
+        img = img[385:930,690:1230]
+        cv2.imwrite('ss.png', cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+        matches = []
+        for i in range(-3, 41):
+            if (i == 0): continue
+            # time.sleep(1)
+            atom = cv2.imread('img/' + str(i) + '.png')
+            atom = atom[16:60,16:60]
+            
+            # atom = cv2.resize(atom, None, fx=0.5, fy=0.5)
+            # img = cv2.resize(img, None, fx=0.5, fy=0.5)
 
-        return self.match_atom(rgba)
+            # mask = cv2.inRange(img, (210, 210, 210), (255, 255,255))
+            # img = cv2.bitwise_and(img,img,mask=mask)
+            # mask = cv2.inRange(atom, (210, 210, 210), (255, 255,255))
+            # atom = cv2.bitwise_and(atom,atom,mask=mask)
 
-    def get_field(self):
-        im = pyautogui.screenshot()
-        time.sleep(0.5)
-        im2 = pyautogui.screenshot()
-        im.save('im.png')
-        num_samples = 500
-        samples = [None] * num_samples
+            img_cv = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            # mg_cv = img
+            # res = cv2.matchTemplate(img_cv, atom, cv2.TM_CCOEFF_NORMED)
 
-        im_marked = cv2.imread('im.png')
+            match_scores = []
+            for channel in range(3):  # Assuming a 3-channel color space like HSV or BGR
+                result = cv2.matchTemplate(img_cv[:, :, channel], atom[:, :, channel], cv2.TM_SQDIFF_NORMED)
+                match_scores.append(result)
+            res = np.max(match_scores, axis=0)
 
-        for i in range(num_samples):
-            x, y = field_x + int(field_r * math.cos(i * 2 * math.pi / num_samples)), field_y + int(field_r * math.sin(i * 2 * math.pi / num_samples))
-            rgb = im.getpixel((x, y))
-            rgb2 = im2.getpixel((x, y))
-            cv2.rectangle(im_marked, (x-1,y-1),(x+1,y+1), (0,255,0), 1)
-            if (rgb == rgb2): samples[i] = self.match_atom(rgb)
-            else: samples[i] = -1
-        cv2.imwrite('im_marked.png', im_marked)
-
-        for i in range(len(samples) - 1, -1, -1):
-            if (samples[i] == -4): samples.pop(i)
-        atoms = []
-        for i in range(1, len(samples) - 1):
-            if (samples[i - 1] != samples[i] or samples[i + 1] != samples[i]): continue
-            if (len(atoms) == 0 or atoms[-1] != samples[i]): atoms.append(samples[i])
-        return atoms
+            mask = res < 0.025
+            coordinates = np.transpose(np.where(mask))
+            for c in coordinates:
+                if (i == 10): cv2.rectangle(img, (c[1], c[0]), (c[1]+44, c[0]+44), (0, 255, 0))
+                matches.append([c[0] - 270, c[1] - 270, i])
+            if (i == 10): cv2.imwrite('res.png', cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+        # print(matches)
+        filtered_matches = []
+        for i in range(len(matches)):
+            if (max(abs(matches[i][0]), abs(matches[i][1])) < 50):
+                continue
+            for j in range(len(filtered_matches)):
+                if (max(abs(matches[i][0] - filtered_matches[j][0]), abs(matches[i][1] - filtered_matches[j][1]))) < 50:
+                    if (res[matches[i][0] + 270][matches[i][1] + 270] < res[filtered_matches[j][0] + 270][filtered_matches[j][1] + 270]):
+                        filtered_matches[j] = matches[i]
+                    break
+            else:
+                filtered_matches.append(matches[i])
+        # print(filtered_matches)
+        filtered_matches = list(map(lambda a : [2 * math.pi - math.acos(a[1] / math.sqrt(a[0]**2 + a[1]**2)) if a[0] > 0 else math.acos(a[1] / math.sqrt(a[0]**2 + a[1]**2)), a[2]], filtered_matches))
+        filtered_matches.sort()
+        print(filtered_matches)
+        field_atoms = []
+        for i in range(len(filtered_matches)):
+            field_atoms.append(filtered_matches[i][1])
+        return (filtered_matches[0][0], Field(False, field_atoms))
 
     def capture_center(self):
         ind = 10
@@ -77,14 +135,50 @@ class Interactor:
                 else:
                     print('saved')
                 ind += 1
-            if (keyboard.is_pressed('0')):
+            if (keyboard.is_pressed('0') and keyboard.is_pressed('9')):
                 break
+
+        
+
+    def play(self):
+        bot = Bot()
+        spawned_atoms = []
+        op = False
+        while True:
+            theta, curr_field = self.read_field()
+            # while (curr_field.atoms != self.read_field().atoms):
+            #     print(curr_field.atoms)
+            #     curr_field = self.read_field()
+            
+            curr_atom = self.read_center()
+            print(curr_field.atoms, curr_atom)
+            spawned_atoms.append(curr_atom)
+
+            move = bot.decide(curr_field, spawned_atoms, curr_atom, op)
+            print(move)
+            print(theta * 360 / (2 * math.pi))
+            if not (op):
+                click_angle = (move - (0.5 if curr_atom != -2 else 0)) * 2 * math.pi / len(curr_field.atoms) + theta
+                print(click_angle * 360 / (2 * math.pi))
+                click_x, click_y = 960 + 200 * math.cos(click_angle), 655 - 200 * math.sin(click_angle)
+                print(click_x, click_y)
+                input()
+                pyautogui.click(click_x, click_y ,clicks=1, interval=1)
+            else:
+                if (move):
+                    pyautogui.click(960, 655, clicks=1, interval=1)
+                op = False
+
+            if (curr_atom == -2):
+                op = True
        
          
      
 interactor = Interactor() 
-interactor.capture_center()
-# time.sleep(1)
+interactor.play()
+# start = datetime.datetime.now()
+# print(interactor.read_field().atoms)
+# print(datetime.datetime.now() - start)
 # print('start')
 # fout = open('spawned_atoms.txt', 'w+')
 # last = -5

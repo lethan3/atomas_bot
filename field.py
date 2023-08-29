@@ -50,7 +50,7 @@ class Field:
         else: raise Exception('Atom removed in empty field')
 
     def check_for_reaction(self, ind):
-        return (self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3 and max(self.get_atom(ind - 1), self.get_atom(ind + 1)) >= 1)
+        return (self.get_atom(ind) == -1 and self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3 and max(self.get_atom(ind - 1), self.get_atom(ind + 1)) >= 1)
 
     def reaction(self, ind):
         while len(self.atoms) > 2:
@@ -63,9 +63,9 @@ class Field:
                 elif (self.get_atom(ind) == -1):
                     new_atom = self.get_atom(ind + 1) + 1
 
-                self.set_atom(ind + 1, 0)
                 self.set_atom(ind, 0)
-                self.set_atom(ind - 1, 0)
+                self.set_atom(ind + 1, 0)
+                self.set_atom(ind + 2, 0)
                 
                 for j in range(2):
                     for i in range(len(self.atoms) - 1, -1, -1):
@@ -83,6 +83,7 @@ class Field:
     
     def reduce(self):
         while True:
+            print(self.atoms)
             if len(self.atoms) <= 2: return
             self.print_state()
             for i in range(len(self.atoms)):
@@ -98,7 +99,9 @@ class Field:
             test_field = self.copy()
             test_field.print_state()
             test_field.place_atom(i, -1)
+            print('\t', test_field.atoms, end = '->')
             test_field.reduce()
+            print(test_field.atoms)
             eval_vector.append(len(self.atoms) - len(test_field.atoms))
         eval_vector.sort(reverse = True)
         return eval_vector

@@ -2,16 +2,14 @@ import random
 
 from field import Field, special
 
-
-
 class Bot:
     def __init__(self):
         self.fout = open('decisions.txt', 'w+')
 
     def move(self, field, spawned_atoms, last_atom, op):
         decision = self.decide(field, spawned_atoms, last_atom, op)
-        self.fout.write(str(len(field)) + ' ' + ' '.join(field) + ',\n')
-        self.fout.write(str(len(spawned_atoms)) + ' ' + ' '.join(spawned_atoms) + ',\n')
+        self.fout.write(str(len(field.atoms)) + ' ' + ' '.join(map(str, field.atoms)) + ',\n')
+        self.fout.write(str(len(spawned_atoms)) + ' ' + ' '.join(map(str, spawned_atoms)) + ',\n')
         self.fout.write(str(last_atom) + '\n')
         self.fout.write(str(op) + '\n')
         self.fout.write(str(decision) + '\n\n')
@@ -27,8 +25,11 @@ class Bot:
             for i in range(len(field.atoms)):
                 test_field = field.copy()
                 test_field.place_atom(i, last_atom)
+                print(i, 'test field original: ', test_field.atoms)
                 test_field.reduce()
+                print(i, 'test field reduce: ', test_field.atoms)
                 evals.append([len(field.atoms) - len(test_field.atoms), test_field.eval_state(), i])
+            print(evals)
             evals.sort(reverse = True)
             return evals[0][2]
 
