@@ -13,7 +13,7 @@ class Field:
     def __init__(self, display, init_atoms=None):
         if (init_atoms is None): init_atoms = []
         self.display = display
-        self.atoms = init_atoms
+        self.atoms = copy.deepcopy(init_atoms)
 
     def print_state(self):
         if not self.display: return

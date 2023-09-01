@@ -181,7 +181,7 @@ class Interactor:
          
      
 interactor = Interactor() 
-interactor.play()
+interactor.capture_center()
 # start = datetime.datetime.now()
 # print(interactor.read_field().atoms)
 # print(datetime.datetime.now() - start)

@@ -7,6 +7,7 @@ import math
 import cv, cv2
 import numpy as np
 import datetime
+import os
 from PIL import Image
 
 from field import Field
@@ -20,6 +21,7 @@ class Interactor:
                 self.atoms.append(None)
                 continue
             self.atoms.append(cv2.imread('img/' + str(i) + '.png'))
+        self.uncertainties = []
 
     def polar_to_rect(self, r, theta):
         return [round(field_outer_r + r * math.cos(theta)), 
@@ -143,7 +145,10 @@ class Interactor:
         match_scores.sort(key=lambda a : a[0])
         # if (match_scores[0][1] == 9):
         #     cv2.imwrite('atom.png', img)
-        return match_scores[0][1]
+        print(match_scores[0][1], 'match score:', match_scores[0][0])
+        if (match_scores[0][0] > 0.15):
+            self.uncertainties.append(img)
+        return (match_scores[0][1], match_scores[0][0])
     
     def read_field(self):
         # img = cv2.imread('ss.png')
@@ -162,8 +167,10 @@ class Interactor:
             # print(np.shape(img))
             # cv2.rectangle(img, (c[1] - atom_inner_r,c[0] - atom_inner_r), (c[1] + atom_inner_r,c[0] + atom_inner_r), (0, 0, 255))
             curr_img = img[c[0] - atom_inner_r:c[0] + atom_inner_r, c[1] - atom_inner_r:c[1] + atom_inner_r]
-            
-            field_atoms.append(self.ident_atom(curr_img))
+            atom, uncertainty = self.ident_atom(curr_img)
+            field_atoms.append(atom)
+            if (uncertainty > 0.15):
+                self.uncertainties.append(img[c[0] - atom_r:c[0] + atom_r, c[1] - atom_r:c[1] + atom_r])
         # cv2.imwrite('img_marked.png', img)
         return (centers[0], field_atoms)
     
@@ -171,21 +178,43 @@ class Interactor:
         # cv2.imwrite('center.png', img[field_outer_r - atom_inner_r:field_outer_r + atom_inner_r, 
         #                            field_outer_r - atom_inner_r:field_outer_r + atom_inner_r])
         return self.ident_atom(img[field_outer_r - atom_inner_r:field_outer_r + atom_inner_r, 
-                                   field_outer_r - atom_inner_r:field_outer_r + atom_inner_r])
+                                   field_outer_r - atom_inner_r:field_outer_r + atom_inner_r])[0]
     
+
     def play(self):
         bot = Bot()
         spawned_atoms = []
         op = False
+        last = -5
+        
+        pause = False
         while True:
-            start = datetime.datetime.now()
+            if pause:
+                time.sleep(0.5)
+            pause = True
             try:
+                self.uncertainties = []
                 first_center, curr_field_atoms = self.read_field()
-                while (curr_field_atoms != self.read_field()[1]):
-                    print(curr_field_atoms)
-                    first_center, curr_field_atoms = self.read_field()
-                print(datetime.datetime.now() - start)
+                while True:
+                    reread = self.read_field()
+                    if (curr_field_atoms != reread[1]):
+                        self.uncertainties = []
+                        first_center, curr_field_atoms = reread
+                    else:
+                        break
+                
+                for img in self.uncertainties:
+                    print('uncertainty')
+                    for i in range(1, 1000000):
+                        if (not os.path.isfile('unident/' + str(i) + '.png')):
+                            print('writing')
+                            cv2.imwrite('unident/' + str(i) + '.png', np.array(img))
+                            break
             except:
+                for i in range(1, 10000000):
+                    if (not os.path.isfile('ss/' + str(i) + '.png')):
+                        cv2.imwrite('ss/' + str(i) + '.png', cv2.cvtColor(np.array(pyautogui.screenshot()), cv2.COLOR_RGB2BGR))
+                        break
                 pyautogui.click(963, 869)
                 continue
             
@@ -205,6 +234,11 @@ class Interactor:
                 move = 0
             else:
                 pyautogui.click(963, 869)
+
+            # for i in range(1, 10000000):
+            #         if (not os.path.isfile('ss/' + str(i) + '.png')):
+            #             cv2.imwrite('ss/' + str(i) + '.png', cv2.cvtColor(np.array(pyautogui.screenshot()), cv2.COLOR_RGB2BGR))
+            #             break
             print(move)
             if not (op) or curr_atom == -2:
                 click_angle = (move - (0.5 if not curr_atom in [-2, -4] else 0)) * 2 * math.pi / len(curr_field_atoms) + self.rect_to_polar(first_center[0], first_center[1])[1]
@@ -213,15 +247,23 @@ class Interactor:
                 print(click_coords)
                 # input()
                 pyautogui.click(field_x + click_coords[0] - field_outer_r, field_y + click_coords[1] - field_outer_r, clicks=1)
-
-                if (curr_atom == -1): time.sleep(1)
             else:
                 if (move):
                     pyautogui.click(field_x, field_y, clicks=1, interval=1)
+                    pause = False
                 op = False
 
             if (curr_atom == -2):
                 op = True
+            
+            if (curr_atom == -1):
+                curr_field.place_atom(move, -1)
+                curr_field.reduce()
+                print(curr_field.atoms)
+                print(curr_field_atoms)
+                print('pause', len(curr_field_atoms) - len(curr_field.atoms))
+                time.sleep(max(0, 0.5 * (len(curr_field_atoms) - len(curr_field.atoms))))
+            last = curr_atom
 
 interactor = Interactor()
 # p = interactor.rect_to_polar(100, 200)
