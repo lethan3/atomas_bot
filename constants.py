@@ -1,4 +1,9 @@
 field_x, field_y, field_r = 960, 655, 234
+field_edge_r = 275
+field_outer_r = 300
+center_r = 38
+atom_r = 38
+atom_inner_r = 26
 rgb_adjust_a = [1.242, 1.232, 1.230]
 rgb_adjust_b = [-23.730, -10.099, -12.469]
 field_inner_r = 200

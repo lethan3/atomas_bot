@@ -25,11 +25,11 @@ class Bot:
             for i in range(len(field.atoms)):
                 test_field = field.copy()
                 test_field.place_atom(i, last_atom)
-                print(i, 'test field original: ', test_field.atoms)
+                # print(i, 'test field original: ', test_field.atoms)
                 test_field.reduce()
-                print(i, 'test field reduce: ', test_field.atoms)
+                # print(i, 'test field reduce: ', test_field.atoms)
                 evals.append([len(field.atoms) - len(test_field.atoms), test_field.eval_state(), i])
-            print(evals)
+            # print(evals)
             evals.sort(reverse = True)
             return evals[0][2]
 

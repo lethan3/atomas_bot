@@ -49,12 +49,14 @@ class Field:
         if len(self.atoms): self.atoms.pop(ind % len(self.atoms))
         else: raise Exception('Atom removed in empty field')
 
-    def check_for_reaction(self, ind):
-        return (self.get_atom(ind) == -1 and self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3 and max(self.get_atom(ind - 1), self.get_atom(ind + 1)) >= 1)
-
+    def check_for_reaction(self, ind, start):
+        if (start):
+            return (self.get_atom(ind) == -1 and self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3 and max(self.get_atom(ind - 1), self.get_atom(ind + 1)) >= 1)
+        else:
+            return self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)
     def reaction(self, ind):
         while len(self.atoms) > 2:
-            if (self.check_for_reaction(ind)):
+            if (self.check_for_reaction(ind, False)):
                 ind -= 1
                 new_atom = max(self.get_atom(ind) + 1, self.get_atom(ind + 1) + 2)
                 
@@ -83,11 +85,11 @@ class Field:
     
     def reduce(self):
         while True:
-            print(self.atoms)
+            # print(self.atoms)
             if len(self.atoms) <= 2: return
             self.print_state()
             for i in range(len(self.atoms)):
-                if (self.check_for_reaction(i)): 
+                if (self.check_for_reaction(i, True)): 
                     self.reaction(i)
                     break
             else:
@@ -99,9 +101,9 @@ class Field:
             test_field = self.copy()
             test_field.print_state()
             test_field.place_atom(i, -1)
-            print('\t', test_field.atoms, end = '->')
+            # print('\t', test_field.atoms, end = '->')
             test_field.reduce()
-            print(test_field.atoms)
+            # print(test_field.atoms)
             eval_vector.append(len(self.atoms) - len(test_field.atoms))
         eval_vector.sort(reverse = True)
         return eval_vector
