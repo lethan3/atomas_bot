@@ -4,8 +4,8 @@ field_outer_r = 300
 center_r = 38
 atom_r = 38
 atom_inner_r = 26
-rgb_adjust_a = [1.242, 1.232, 1.230]
-rgb_adjust_b = [-23.730, -10.099, -12.469]
+rgb_adjust_a = [1.21, 1.20, 1.21]
+rgb_adjust_b = [-20, -10, -13]
 field_inner_r = 200
 atom_colors = [
     [255,255,255], # neutrino
@@ -136,5 +136,9 @@ atom_colors = [
     [48,145,65],
     [77,200,230],
     [255,0,0],
-    [17,119,245]
+    [17,119,245],
+    [0,0,0]
+]
+atom_symbols = [
+    'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Nh', 'Fl', 'Mc', 'Lv', 'Ts', 'Og', 'Bn', 'Gb', 'Bb', 'Pi', 'Sir', 'Ea', ''
 ]

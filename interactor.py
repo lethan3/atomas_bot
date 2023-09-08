@@ -13,14 +13,16 @@ from PIL import Image
 from field import Field
 from bot import Bot
 
+MAX_ATOM = 201
+
 class Interactor:
     def __init__(self):
         self.atoms = []
-        for i in range(-4, 42):
+        for i in range(-4, MAX_ATOM):
             if (i == 0): 
                 self.atoms.append(None)
                 continue
-            self.atoms.append(cv2.imread('img/' + str(i) + '.png'))
+            self.atoms.append(cv2.imread('img_gen/' + str(i) + '.png'))
         self.uncertainties = []
 
     def polar_to_rect(self, r, theta):
@@ -129,8 +131,8 @@ class Interactor:
 
     def ident_atom(self, img):
         match_scores = []
-        for i in range(-4, 42):
-            if (i == 0): continue
+        for i in range(-4, self.r):
+            if (0 <= i < self.l): continue
             atom = self.atoms[i + 4]
             atom = atom[len(atom)//2 - atom_inner_r:len(atom)//2 + atom_inner_r, 
                         len(atom)//2 - atom_inner_r:len(atom)//2 + atom_inner_r]
@@ -185,13 +187,12 @@ class Interactor:
         bot = Bot()
         spawned_atoms = []
         op = False
+        op2 = False
         last = -5
-        
+
         pause = False
+        self.l, self.r = 1, MAX_ATOM
         while True:
-            if pause:
-                time.sleep(0.5)
-            pause = True
             try:
                 self.uncertainties = []
                 first_center, curr_field_atoms = self.read_field()
@@ -216,6 +217,9 @@ class Interactor:
                         cv2.imwrite('ss/' + str(i) + '.png', cv2.cvtColor(np.array(pyautogui.screenshot()), cv2.COLOR_RGB2BGR))
                         break
                 pyautogui.click(963, 869)
+                fout = open('spawned_atoms.txt', 'w+')
+                fout.write(str(spawned_atoms))
+                fout.close()
                 continue
             
             img = np.array(pyautogui.screenshot())
@@ -226,7 +230,10 @@ class Interactor:
             curr_atom = self.read_center(np.copy(img))
 
             print(curr_field_atoms, curr_atom)
-            spawned_atoms.append(curr_atom)
+
+            if not (op or op2): spawned_atoms.append(curr_atom)
+            print(spawned_atoms)
+
             curr_field = Field(False, curr_field_atoms)
             if (len(curr_field_atoms) >= 2):
                 move = bot.decide(curr_field, spawned_atoms, curr_atom, op)
@@ -240,6 +247,7 @@ class Interactor:
             #             cv2.imwrite('ss/' + str(i) + '.png', cv2.cvtColor(np.array(pyautogui.screenshot()), cv2.COLOR_RGB2BGR))
             #             break
             print(move)
+            if (op2): op2 = False
             if not (op) or curr_atom == -2:
                 click_angle = (move - (0.5 if not curr_atom in [-2, -4] else 0)) * 2 * math.pi / len(curr_field_atoms) + self.rect_to_polar(first_center[0], first_center[1])[1]
                 print(click_angle * 360 / (2 * math.pi))
@@ -252,6 +260,7 @@ class Interactor:
                     pyautogui.click(field_x, field_y, clicks=1, interval=1)
                     pause = False
                 op = False
+                op2 = True
 
             if (curr_atom == -2):
                 op = True
@@ -262,8 +271,11 @@ class Interactor:
                 print(curr_field.atoms)
                 print(curr_field_atoms)
                 print('pause', len(curr_field_atoms) - len(curr_field.atoms))
-                time.sleep(max(0, 0.5 * (len(curr_field_atoms) - len(curr_field.atoms))))
+                time.sleep(max(0, 0.3 * (len(curr_field_atoms) - len(curr_field.atoms))))
             last = curr_atom
+            l = max(1, min(curr_field.atoms) - 10)
+            r = min(MAX_ATOM, max(curr_field.atoms) + 10)
+            print(l, r)
 
 interactor = Interactor()
 # p = interactor.rect_to_polar(100, 200)
