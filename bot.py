@@ -8,10 +8,12 @@ class Bot:
 
     def move(self, field, spawned_atoms, last_atom, op):
         decision = self.decide(field, spawned_atoms, last_atom, op)
-        self.fout.write(str(len(field.atoms)) + ' ' + ' '.join(map(str, field.atoms)) + ',\n')
-        self.fout.write(str(len(spawned_atoms)) + ' ' + ' '.join(map(str, spawned_atoms)) + ',\n')
+        self.fout.write(' '.join(map(str, field.atoms)) + '\n')
+        self.fout.write(('1' if len(spawned_atoms) >= 4 and spawned_atoms[-4:].count(-1) == 0 else '0') + ' ')
+        self.fout.write(('1' if len(spawned_atoms) >= 19 and spawned_atoms[-19:].count(-2) == 0 else '0') + '\n')
+        # self.fout.write(str(len(spawned_atoms)) + ' ' + ' '.join(map(str, spawned_atoms)) + '\n')
         self.fout.write(str(last_atom) + '\n')
-        self.fout.write(str(op) + '\n')
+        self.fout.write(('1' if op else '0') + '\n')
         self.fout.write(str(decision) + '\n\n')
         self.fout.flush()
         return decision

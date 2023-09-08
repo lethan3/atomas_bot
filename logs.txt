@@ -15,3 +15,8 @@
 * Attempted to implement screen-reading mechanism to get game state from display.
 * First approach: use known hex codes of colors to determine the atom, choosing the closest choice based on Euclidean distance. This did not work at all until I realized that the screen was altering the colors shown on the display. Gathering a few data points and doing linear regressions on each of the RGB channels improved the accuracy immensely, but the program still could not differentiate between similarly-colored atoms (pluses and Manganese) as well as atoms of the same type that were close together.
 * Second approach: use tesseract OCR to read the element symbols. Even after image preprocessing, tesseract could not read the 'H' symbols on the hydrogen atoms.
+
+8/29/23-9/8/23:
+* Working approach - first, take absolute difference of image pixels with background color near atoms; then, run floodfill on image based on threshold to get the areas of interest
+* Once areas of interest are received, filter those which are not approximately size of atom; find center of mass of every region using vector addition; take square region centered at that point and match to known image of atoms
+* As getting images of the atoms is hard, developed script to recreate atoms as closely as possible

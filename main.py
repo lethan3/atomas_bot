@@ -1,8 +1,8 @@
 import seaborn as sns
 
+from bot import Bot
 from field import Field
 from game import Game
-from bot import Bot
 
 moves_survived = []
 for _ in range(100):

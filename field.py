@@ -51,19 +51,21 @@ class Field:
 
     def check_for_reaction(self, ind, start):
         if (start):
-            return (self.get_atom(ind) == -1 and self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3 and max(self.get_atom(ind - 1), self.get_atom(ind + 1)) >= 1)
+            return (self.get_atom(ind) == -1 and self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3)
         else:
-            return self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)
+            return (self.get_atom(ind - 1) >= 1 and self.get_atom(ind - 1) == self.get_atom(ind + 1)) or (self.get_atom(ind) == -3)
     def reaction(self, ind):
         while len(self.atoms) > 2:
             if (self.check_for_reaction(ind, False)):
                 ind -= 1
                 new_atom = max(self.get_atom(ind) + 1, self.get_atom(ind + 1) + 2)
                 
-                if (self.get_atom(ind) == -3):
-                    new_atom = max(self.get_atom(ind - 1) + 3, self.get_atom(ind + 1) + 3)
-                elif (self.get_atom(ind) == -1):
-                    new_atom = self.get_atom(ind + 1) + 1
+                if (self.get_atom(ind + 1) == -3):
+                    new_atom = max(self.get_atom(ind) + 3, self.get_atom(ind + 2) + 3)
+                    if (self.get_atom(ind) == -1 and self.get_atom(ind + 2) == -1):
+                        new_atom = 4
+                elif (self.get_atom(ind + 1) == -1):
+                    new_atom = self.get_atom(ind) + 1
 
                 self.set_atom(ind, 0)
                 self.set_atom(ind + 1, 0)

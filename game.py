@@ -19,9 +19,9 @@ class Game:
         turns = len(self.spawned_atoms)
         l, r = turns // 40 + 1, (turns // 40) * 5 // 4 + 3
         spawned_atom = 0
-        if (random.randint(1, 5) == 1 or (len(self.spawned_atoms) >= 5 and self.spawned_atoms[-5:].count(-1) == 0)):
+        if (random.randint(1, 5) == 1 or (len(self.spawned_atoms) >= 4 and self.spawned_atoms[-4:].count(-1) == 0)):
             spawned_atom = -1
-        elif (random.randint(1, 20) == 1 or (len(self.spawned_atoms) >= 20 and self.spawned_atoms[-20:].count(-2) == 0)):
+        elif (random.randint(1, 20) == 1 or (len(self.spawned_atoms) >= 19 and self.spawned_atoms[-19:].count(-2) == 0)):
             spawned_atom = -2
         elif random.randint(1, 60) == 1:
             spawned_atom = -3
